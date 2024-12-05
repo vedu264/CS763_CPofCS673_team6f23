@@ -5,3 +5,4 @@ pytest-django==4.4.0
 pyjwt==2.3.0
 bcrypt==3.2.0
 python-dotenv==0.19.2
+django-allauth==0.45.0
