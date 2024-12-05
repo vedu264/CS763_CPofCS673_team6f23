@@ -17,15 +17,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set Django settings module
-      - name: Set Django settings module
-        run: echo "DJANGO_SETTINGS_MODULE=code.server.core.settings" >> $GITHUB_ENV
-
-      # Step 3: Set up Python environment
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'  # Set the version of Python you're using
+
+      # Step 3: Set Django settings module and PYTHONPATH
+      - name: Set Django settings module and update PYTHONPATH
+        run: |
+          echo "DJANGO_SETTINGS_MODULE=code.server.core.settings" >> $GITHUB_ENV
+          echo "PYTHONPATH=$(pwd)/code/server:$(pwd)" >> $GITHUB_ENV  # Add code/server to PYTHONPATH
 
       # Step 4: Install dependencies
       - name: Install dependencies
