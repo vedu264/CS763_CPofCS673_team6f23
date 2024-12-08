@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv, find_dotenv
 
-
+# Load environment variables
 ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
@@ -14,11 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-
 
 # Application definition
 
@@ -34,7 +33,6 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
 
-
     # Local Apps (project's apps)
     'account',
     'products',
@@ -42,7 +40,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Session middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -128,5 +126,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
 }
+
+# Session management configurations for session timeout
+SESSION_COOKIE_AGE = 900  # In seconds (15 minutes)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expire session when the browser is closed
+SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request, extending expiration time on activity
+
+# Security settings for CSRF
+CSRF_COOKIE_AGE = 3600  # 1 hour
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
+
+# To improve session management and security, ensure that sessions are set as HttpOnly and Secure.
+SESSION_COOKIE_HTTPONLY = True  # Prevent client-side access to session cookies
+SESSION_COOKIE_SECURE = True  # Ensure cookies are only sent over HTTPS
