@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
+import bleach from 'bleach'; // Import bleach for sanitization
 import EditProfileModal from '../Components/EditProfileModal';
 import ProductCardProfile from '../Components/ProductCardProfile';
 
@@ -15,9 +16,7 @@ const User = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(
-          `/api/users/user`
-        );
+        const res = await axios.get(`/api/users/user`);
         setUser(res.data?.user);
         setProducts(res.data?.posts);
       } catch (error) {
@@ -37,9 +36,11 @@ const User = () => {
     return <div>Error: {error}</div>;
   }
 
-  const handleEditSubmit = async (formData) => {
-    //TODO: Update user details
-  };
+  const sanitizedBio = bleach.clean(user?.bio, {
+    tags: [],  // Remove all tags
+    attributes: {},
+    strip: true, // Strip unwanted content
+  });
 
   return (
     <div>
@@ -49,15 +50,10 @@ const User = () => {
             <div className="grid order-last grid-cols-3 mt-20 text-center md:order-first md:mt-0">
               <div className="flex items-center justify-center">
                 <div className="flex flex-col justify-center">
-                  <p className="text-xl font-bold text-gray-700">
-                    {products?.length}
-                  </p>
-                  <p className="text-gray-400">
-                    {products?.length === 1 ? 'Post' : 'Posts'}
-                  </p>
+                  <p className="text-xl font-bold text-gray-700">{products?.length}</p>
+                  <p className="text-gray-400">{products?.length === 1 ? 'Post' : 'Posts'}</p>
                 </div>
-                {JSON.parse(localStorage.getItem('user')).id ===
-                user?.id ? null : (
+                {JSON.parse(localStorage.getItem('user')).id === user?.id ? null : (
                   <Link
                     to={`/chat/${params?.id}`}
                     className="flex flex-col items-center justify-center w-12 h-12 ml-4 text-indigo-500"
@@ -90,9 +86,9 @@ const User = () => {
                   fill="currentColor"
                 >
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                   />
                 </svg>
               </div>
@@ -100,16 +96,16 @@ const User = () => {
           </div>
           <div className="pb-12 mt-20 text-center border-b">
             <div className="flex justify-between items-center">
-            <h1 className="text-4xl font-medium text-gray-700">{user?.name}</h1>
-            <button 
-              onClick={() => setShowEditModal(true)}
-              className="text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
-            >
-              Edit Profile
-            </button>
+              <h1 className="text-4xl font-medium text-gray-700">{user?.name}</h1>
+              <button 
+                onClick={() => setShowEditModal(true)}
+                className="text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
+              >
+                Edit Profile
+              </button>
             </div>
             <p className="mt-3 font-light text-gray-600">{user?.email}</p>
-            <p className="mt-8 text-gray-500">{user?.bio}</p>
+            <p className="mt-8 text-gray-500">{sanitizedBio}</p>
             <EditProfileModal
               isVisible={showEditModal}
               onClose={() => setShowEditModal(false)}

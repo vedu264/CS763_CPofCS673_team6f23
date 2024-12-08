@@ -2,13 +2,18 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
-from .auth.serializer import UserAccountSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import status
-from .models import CustomUser
-
 from django.contrib.auth import authenticate
+from .models import CustomUser
+from .auth.serializer import UserAccountSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+import bleach  # Import bleach for sanitizing input
+
+# Sanitization function using bleach
+def sanitize_input(input_data):
+    """Sanitize input to remove any potential XSS attack vector."""
+    return bleach.clean(input_data, tags=[], attributes={}, styles=[], strip=True)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -24,19 +29,16 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         # If user is authenticated and active, proceed with token generation
         return super().post(request, *args, **kwargs)
 
-        # Generate JWT token
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        return Response({"access": access_token, "refresh": str(refresh)}, status=status.HTTP_200_OK)
-
-	
 class AccountView(APIView):
     permission_classes = (IsAuthenticated,)
     parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def get(self, request):
+        # Sanitize the user data before returning
+        sanitized_name = sanitize_input(request.user.name)
         serializer = UserAccountSerializer(request.user, many=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # Return sanitized name with the response (if needed)
+        return Response({"name": sanitized_name, **serializer.data}, status=status.HTTP_200_OK)
 
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -55,5 +57,22 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"message": "Invalid token or error in processing"}, status=status.HTTP_400_BAD_REQUEST)
 
+# Update any other text-based fields such as user profile description or name fields if needed.
+# For example, if you have a view to update the user profile:
 
+class UserProfileUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
+    def put(self, request, *args, **kwargs):
+        # Sanitize the name and any other text fields in the profile
+        sanitized_name = sanitize_input(request.data.get("name", ""))
+        sanitized_bio = sanitize_input(request.data.get("bio", ""))
+
+        # Proceed with profile update
+        user = request.user
+        user.name = sanitized_name
+        user.bio = sanitized_bio  # Assume bio is a field in your CustomUser model
+        user.save()
+
+        return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
