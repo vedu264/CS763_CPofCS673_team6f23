@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { sanitizeSearchInput } from '../utils/sanitize';  // Import sanitize function
 
 export default function ChatSidebar({ contacts }) {
   const [search, setSearch] = useState('');
@@ -7,23 +8,26 @@ export default function ChatSidebar({ contacts }) {
 
   useEffect(() => {
     const handleSearch = () => {
-      // Filter contacts by name or email
+      // Sanitize the search input to prevent any XSS attack
+      const sanitizedSearch = sanitizeSearchInput(search);
+
+      // Filter contacts by sanitized name or email
       const filteredContacts = contacts.filter((c) => {
         return (
-          c?.name?.toLowerCase().includes(search.toLowerCase()) ||
-          c?.email?.toLowerCase().includes(search.toLowerCase())
+          c?.name?.toLowerCase().includes(sanitizedSearch.toLowerCase()) ||
+          c?.email?.toLowerCase().includes(sanitizedSearch.toLowerCase())
         );
       });
 
       setFilteredContacts(filteredContacts);
     };
-    // If search is empty, show all contacts
     if (search === '') {
       setFilteredContacts(contacts);
     } else {
       handleSearch();
     }
   }, [search, contacts]);
+
   return (
     <section className="flex flex-col flex-none w-24 overflow-auto transition-all duration-300 ease-in-out group lg:max-w-sm md:w-2/5">
       <div className="flex-none p-4 search-box">
@@ -33,7 +37,7 @@ export default function ChatSidebar({ contacts }) {
               className="w-full py-2 pl-10 pr-6 transition duration-300 ease-in bg-gray-200 border border-gray-800 rounded-full focus:outline-none focus:shadow-md"
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}  // Update search state
               placeholder="Search contacts"
             />
             <span className="absolute top-0 left-0 inline-block mt-2 ml-3">

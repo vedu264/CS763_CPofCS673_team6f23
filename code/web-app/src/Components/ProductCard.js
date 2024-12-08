@@ -1,7 +1,14 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { categories, location } from '../utils';
+import bleach from 'bleach';  // Import bleach to sanitize inputs
 
 export default function ProductCard({ product }) {
+  const sanitizedDescription = bleach.clean(product?.description, {
+    tags: [],  // Remove all tags
+    attributes: {},
+    strip: true, // Strip unwanted content
+  });
+
   return (
     <div className="h-full overflow-hidden rounded-lg cursor-pointer group hover:shadow">
       <div className="w-full h-full">
@@ -55,10 +62,10 @@ export default function ProductCard({ product }) {
           </p>
 
           <p className="font-light text-gray-600 break-words text-md">
-            {product?.description?.length > 50 ? (
-              <span>{product?.description?.substring(0, 50)}...</span>
+            {sanitizedDescription.length > 50 ? (
+              <span>{sanitizedDescription.substring(0, 50)}...</span>
             ) : (
-              <span>{product?.description}</span>
+              <span>{sanitizedDescription}</span>
             )}
             <Link to={`/product/${1}`} className="inline-flex text-blue-500">
               read more
