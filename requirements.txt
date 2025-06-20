@@ -6,3 +6,4 @@ pyjwt==2.3.0
 bcrypt==3.2.0
 python-dotenv==0.19.2
 django-allauth==0.45.0
+urllib3>=2.5.0 # not directly required, pinned by Snyk to avoid a vulnerability
