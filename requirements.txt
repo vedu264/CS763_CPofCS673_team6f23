@@ -1,4 +1,4 @@
-django==3.2.8
+django==4.2.27
 djangorestframework==3.12.4
 pytest==6.2.5
 pytest-django==4.4.0
@@ -6,3 +6,4 @@ pyjwt==2.3.0
 bcrypt==3.2.0
 python-dotenv==0.19.2
 django-allauth==0.45.0
+sqlparse>=0.5.4 # not directly required, pinned by Snyk to avoid a vulnerability
